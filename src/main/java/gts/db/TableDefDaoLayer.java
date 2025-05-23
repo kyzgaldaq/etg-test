@@ -113,10 +113,6 @@ public class TableDefDaoLayer {
       return count > 0;
    }
 
-   public List<ColumnDto> getColumnsByTableName(String tableName) {
-
-   }
-
    private String getPostgeSqlType(String type) {
       return switch (type) {
          case "String" -> "VARCHAR";
