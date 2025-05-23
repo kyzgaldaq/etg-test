@@ -10,20 +10,19 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.jdbc.core.simple.JdbcClient;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-@Service
+@Repository
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class TableDefDaoLayer {
    final JdbcClient jdbcClient;
 
-
    public TableDto createTable(TableDto dto){
       if(checkTableExists(dto.getTableName()))
-         throw new CustomAlreadyExistsException("Table already exists");
+         throw new CustomAlreadyExistsException(String.format("Table %s already exists", dto.getTableName()));
 
       String sqlDef = "insert into app_dynamic_table_definitions(table_name, user_friendly_name) " +
               "values (?,?)" ;
@@ -103,6 +102,21 @@ public class TableDefDaoLayer {
       return new PaginationDTO<>(tables, page, size, totalElements);
    }
 
+   public boolean checkTableExists(String tableName) {
+      String sql = "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = ? AND table_name = ?";
+
+      int count = jdbcClient.sql(sql)
+              .params("public", tableName)
+              .query(Integer.class)
+              .single();
+
+      return count > 0;
+   }
+
+   public List<ColumnDto> getColumnsByTableName(String tableName) {
+
+   }
+
    private String getPostgeSqlType(String type) {
       return switch (type) {
          case "String" -> "VARCHAR";
@@ -117,19 +131,9 @@ public class TableDefDaoLayer {
       };
    }
 
-   private boolean checkTableExists(String tableName) {
-      String sql = "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = ? AND table_name = ?";
-
-      int count = jdbcClient.sql(sql)
-              .params("public", tableName)
-              .query(Integer.class)
-              .single();
-
-      return count > 0;
-   }
-
    private int getTableId(String tableName) {
       String sql = "select id from information_schema.tables where table_name = ?";
       return jdbcClient.sql(sql).param(1,tableName).query(Integer.class).single();
    }
+
 }

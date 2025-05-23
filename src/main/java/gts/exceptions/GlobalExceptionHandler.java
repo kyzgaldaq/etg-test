@@ -42,6 +42,11 @@ public class GlobalExceptionHandler {
         return errorResponse(HttpStatus.CONFLICT, e, request);
     }
 
+    @ExceptionHandler(CustomIllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleException(CustomIllegalArgumentException e, HttpServletRequest request) {
+        return errorResponse(HttpStatus.BAD_REQUEST, e, request);
+    }
+
     private static ResponseEntity<ErrorResponse> errorResponse(HttpStatus httpStatus, Exception e,  HttpServletRequest request){
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())

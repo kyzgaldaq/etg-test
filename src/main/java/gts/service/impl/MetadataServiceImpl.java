@@ -1,8 +1,9 @@
-package gts.service;
+package gts.service.impl;
 
 import gts.db.TableDefDaoLayer;
 import gts.dtos.PaginationDTO;
 import gts.dtos.TableDto;
+import gts.service.MetadataService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
