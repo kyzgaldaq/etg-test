@@ -2,8 +2,9 @@ package gts.service.impl;
 
 import gts.db.TableDefDaoLayer;
 import gts.dtos.PaginationDTO;
-import gts.dtos.TableDto;
+import gts.dtos.TableDTO;
 import gts.service.MetadataService;
+import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -13,21 +14,23 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class MetadataServiceImpl implements MetadataService {
-    TableDefDaoLayer daoLayer;
+   final TableDefDaoLayer daoLayer;
+
+    @Transactional
     @Override
-    public TableDto createTable(TableDto dto) {
+    public TableDTO createTable(TableDTO dto) {
         return daoLayer.createTable(dto);
     }
 
     @Override
-    public TableDto getTable(String tableName) {
+    public TableDTO getTable(String tableName) {
         return daoLayer.getTableByName(tableName);
     }
 
     @Override
-    public PaginationDTO<TableDto> getAllTables(int page, int size) {
+    public PaginationDTO<TableDTO> getAllTables(int page, int size) {
         return daoLayer.getAllTablesPaginated(page, size);
     }
 }

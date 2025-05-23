@@ -1,5 +1,9 @@
-package gts.exceptions;
+package gts.exceptions.handler;
 
+import gts.exceptions.CustomAlreadyExistsException;
+import gts.exceptions.CustomIllegalArgumentException;
+import gts.exceptions.CustomNotFoundException;
+import gts.exceptions.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,15 +17,15 @@ import java.time.LocalDateTime;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException e,
-                                                                      HttpServletRequest request) {
-        FieldError fieldError = e.getBindingResult().getFieldError();
-        String message = fieldError != null
-                ? "Validation failed for field '" + fieldError.getField() + "': " + fieldError.getDefaultMessage()
-                : "Validation error";
-        return errorResponse(HttpStatus.BAD_REQUEST, e, request);
-    }
+//    @ExceptionHandler(MethodArgumentNotValidException.class)
+//    public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException e,
+//                                                                   HttpServletRequest request) {
+//        FieldError fieldError = e.getBindingResult().getFieldError();
+//        String message = fieldError != null
+//                ? "Validation failed for field '" + fieldError.getField() + "': " + fieldError.getDefaultMessage()
+//                : "Validation error";
+//        return errorResponse(HttpStatus.BAD_REQUEST, e, request);
+//    }
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception e, HttpServletRequest request) {
         return errorResponse(HttpStatus.INTERNAL_SERVER_ERROR,e, request);

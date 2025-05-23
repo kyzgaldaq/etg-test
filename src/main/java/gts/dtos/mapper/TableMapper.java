@@ -1,15 +1,15 @@
-package gts;
+package gts.dtos.mapper;
 
-import gts.dtos.TableDto;
+import gts.dtos.TableDTO;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class TableMapper  implements RowMapper<TableDto> {
+public class TableMapper  implements RowMapper<TableDTO> {
     @Override
-    public TableDto mapRow(ResultSet rs, int rowNum) throws SQLException {
-        return TableDto.builder()
+    public TableDTO mapRow(ResultSet rs, int rowNum) throws SQLException {
+        return TableDTO.builder()
                 .tableName(rs.getString("table_name"))
                 .userFriendlyName(rs.getString("user_friendly_name"))
                 .build();

@@ -6,6 +6,9 @@ spring:
     username: ${PRIMARY_DATABASE_USERNAME:postgres}
     password: ${PRIMARY_DATABASE_PASS:1111}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 10
   jpa:
     hibernate:
       ddl-auto: none
@@ -16,7 +19,6 @@ spring:
     password: ${spring.datasource.password}
     schemas: public
     locations: classpath:migration/
-    baseline-on-migrate: false
+    baseline-on-migrate: true
     enabled: true
-
 

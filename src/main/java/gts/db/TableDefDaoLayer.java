@@ -1,17 +1,19 @@
 package gts.db;
 
-import gts.ColumnMapper;
-import gts.TableMapper;
-import gts.dtos.ColumnDto;
+import gts.dtos.mapper.ColumnMapper;
+import gts.dtos.mapper.TableMapper;
+import gts.dtos.ColumnDTO;
 import gts.dtos.PaginationDTO;
-import gts.dtos.TableDto;
+import gts.dtos.TableDTO;
 import gts.exceptions.CustomAlreadyExistsException;
+import gts.exceptions.CustomIllegalArgumentException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Repository
@@ -20,10 +22,10 @@ import java.util.List;
 public class TableDefDaoLayer {
    final JdbcClient jdbcClient;
 
-   public TableDto createTable(TableDto dto){
-      if(checkTableExists(dto.getTableName()))
+   public TableDTO createTable(TableDTO dto){
+      if(checkTableExists(dto.getTableName())) {
          throw new CustomAlreadyExistsException(String.format("Table %s already exists", dto.getTableName()));
-
+      }
       String sqlDef = "insert into app_dynamic_table_definitions(table_name, user_friendly_name) " +
               "values (?,?)" ;
 
@@ -44,36 +46,39 @@ public class TableDefDaoLayer {
                                          x.getType(),
                                          getPostgeSqlType(x.getType()),
                                          x.getIsNullable(),
-                                         true
+                                         x.getIsPrimaryKey()
                                          )
                                  .update();
                   }
           );
 
+        jdbcClient.sql(buildCreateTableSql(dto)).update();
+
+
           return dto;
    }
 
-   public TableDto getTableByName(String tableName) {
+   public TableDTO getTableByName(String tableName) {
       String tableSql = "SELECT * FROM app_dynamic_table_definitions WHERE table_name = ?";
       String columnsSql = "SELECT * FROM app_dynamic_column_definitions WHERE table_definition_id = ?";
 
-         TableDto response = jdbcClient.sql(tableSql)
-                 .param(1, tableName)
+         TableDTO response = jdbcClient.sql(tableSql)
+                 .params(tableName)
                  .query(new TableMapper())
                  .single();
 
          int tableId = getTableId(tableName);
 
-         List<ColumnDto> columns = jdbcClient.sql(columnsSql)
-                 .param(1, tableId)
-                 .query(new ColumnMapper()).list();
+         List<ColumnDTO> columns = jdbcClient.sql(columnsSql)
+                 .params(tableId)
+                 .query(new ColumnMapper()).stream().toList();
 
          response.setColumns(columns);
          return response;
 
    }
 
-   public PaginationDTO<TableDto> getAllTablesPaginated(int page, int size) {
+   public PaginationDTO<TableDTO> getAllTablesPaginated(int page, int size) {
       int offset = page * size;
 
       int totalElements = jdbcClient
@@ -89,10 +94,10 @@ public class TableDefDaoLayer {
         limit ? offset ?
     """;
 
-      List<TableDto> tables = jdbcClient.sql(sql)
+      List<TableDTO> tables = jdbcClient.sql(sql)
               .params(size,offset)
               .query((rs, rowNum) ->
-                      TableDto.builder()
+                      TableDTO.builder()
                       .tableName(rs.getString("table_name"))
                       .userFriendlyName(rs.getString("user_friendly_name"))
                       .columnCount(rs.getInt("column_count"))
@@ -103,15 +108,16 @@ public class TableDefDaoLayer {
    }
 
    public boolean checkTableExists(String tableName) {
-      String sql = "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = ? AND table_name = ?";
+      String sql = "SELECT to_regclass(?) IS NOT NULL";
 
-      int count = jdbcClient.sql(sql)
-              .params("public", tableName)
-              .query(Integer.class)
+      String fullTableName = "public." + tableName;
+
+      return jdbcClient.sql(sql)
+              .params(fullTableName)
+              .query(Boolean.class)
               .single();
-
-      return count > 0;
    }
+
 
    private String getPostgeSqlType(String type) {
       return switch (type) {
@@ -123,13 +129,43 @@ public class TableDefDaoLayer {
          case "Timestamp" -> "TIMESTAMP WITHOUT TIME ZONE ";
          case "Date" -> "DATE";
          case "Decimal" -> "NUMERIC(19, 4)";
+         case "Serial" -> "SERIAL";
          default -> null;
       };
    }
 
    private int getTableId(String tableName) {
-      String sql = "select id from information_schema.tables where table_name = ?";
+      String sql = "select id from app_dynamic_table_definitions where table_name = ?";
       return jdbcClient.sql(sql).param(1,tableName).query(Integer.class).single();
    }
 
+
+   private String buildCreateTableSql(TableDTO dto) {
+      StringBuilder sb = new StringBuilder();
+      sb.append("create table if not exists ").append(dto.getTableName()).append(" (");
+
+      List<String> columnDefs = new ArrayList<>();
+
+      for (ColumnDTO col : dto.getColumns()) {
+         StringBuilder colDef = new StringBuilder();
+         colDef.append(col.getName()).append(" ").append(getPostgeSqlType(col.getType()));
+
+         if (!col.getIsNullable()) {
+            colDef.append(" NOT NULL");
+         }
+
+         if(col.getIsPrimaryKey()){
+            colDef.append(" PRIMARY KEY");
+         }
+         columnDefs.add(colDef.toString());
+      }
+      sb.append(columnDefs);
+      int index = sb.indexOf("[");
+      sb.deleteCharAt(index);
+      index = sb.indexOf("]");
+      sb.deleteCharAt(index);
+      sb.append(");");
+      System.out.println(sb);
+      return sb.toString();
+   }
 }

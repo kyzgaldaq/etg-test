@@ -1,7 +1,6 @@
 package gts.controller;
 
 import gts.dtos.PaginationDTO;
-import gts.dtos.TableColumnsModel;
 import gts.service.TableMetaDataService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -12,14 +11,15 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
-@RestController("/api/v1/dynamic-tables/data/")
+@RestController
+@RequestMapping("/api/v1/dynamic-tables/data/")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class DataController {
      final TableMetaDataService tableMetaDataService;
 
     @PostMapping("{tableName}")
-    public ResponseEntity<Map<String, Object>> insertData(@RequestParam("tableName") String tableName, @RequestBody Map<String, Object> data) {
+    public ResponseEntity<Map<String, Object>> insertData(@RequestBody Map<String, Object> data, @PathVariable String tableName) {
         Map<String, Object> result = tableMetaDataService.insertDataByTableName(tableName, data);
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
@@ -31,8 +31,8 @@ public class DataController {
     }
 
     @PutMapping("{tableName}/{id}")
-    public ResponseEntity<Map<String, Object>> updateData(@PathVariable("tableName") String tableName, @PathVariable("id") Long id) {
-        Map<String, Object> result = tableMetaDataService.updateDataByTableNameAndId(tableName, id);
+    public ResponseEntity<Map<String, Object>> updateData(@PathVariable("tableName") String tableName, @PathVariable("id") Long id, @RequestBody Map<String, Object> data) {
+        Map<String, Object> result = tableMetaDataService.updateDataByTableNameAndId(tableName, id, data);
         return ResponseEntity.ok(result);
     }
 

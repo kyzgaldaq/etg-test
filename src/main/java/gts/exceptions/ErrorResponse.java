@@ -18,6 +18,4 @@ public class ErrorResponse {
     String message;
     String path;
     LocalDateTime timestamp;
-
-
 }

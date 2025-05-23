@@ -3,6 +3,7 @@ package gts.service.impl;
 import gts.db.ColumnDefDaoLayer;
 import gts.dtos.PaginationDTO;
 import gts.service.TableMetaDataService;
+import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -18,6 +19,7 @@ import java.util.Map;
 public class TableMetaDataServiceImpl implements TableMetaDataService {
     ColumnDefDaoLayer daoLayer;
 
+    @Transactional
     @Override
     public Map<String, Object> insertDataByTableName(String tableName, Map<String, Object> data) {
         return daoLayer.insertDataByTableName(tableName, data);
@@ -29,8 +31,8 @@ public class TableMetaDataServiceImpl implements TableMetaDataService {
     }
 
     @Override
-    public Map<String, Object> updateDataByTableNameAndId(String tableName, Long id) {
-        return null;
+    public Map<String, Object> updateDataByTableNameAndId(String tableName, Long id, Map<String, Object> data) {
+        return daoLayer.updateDataByTableNameAndId(tableName, id, data);
     }
 
     @Override
@@ -39,7 +41,7 @@ public class TableMetaDataServiceImpl implements TableMetaDataService {
     }
 
     @Override
-    public PaginationDTO<Map<String, Object>> getDataPaginated(String tableName, Integer page, Integer size) {
-        return null;
+    public PaginationDTO<Map<String, Object>> getDataPaginated(String tableName, int page, int size) {
+        return daoLayer.getDataPaginated(tableName, page, size);
     }
 }

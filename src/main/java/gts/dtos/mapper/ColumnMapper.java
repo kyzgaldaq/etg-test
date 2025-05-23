@@ -1,20 +1,20 @@
-package gts;
+package gts.dtos.mapper;
 
-import gts.dtos.ColumnDto;
+import gts.dtos.ColumnDTO;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class ColumnMapper implements RowMapper<ColumnDto>{
+public class ColumnMapper implements RowMapper<ColumnDTO>{
     @Override
-    public ColumnDto mapRow(ResultSet rs, int rowNum) throws SQLException {
-        return ColumnDto.builder()
+    public ColumnDTO mapRow(ResultSet rs, int rowNum) throws SQLException {
+        return ColumnDTO.builder()
                 .name(rs.getString("column_name"))
                 .type(rs.getString("column_type"))
                 .postgresType(rs.getString("postgres_column_type"))
                 .isNullable(rs.getBoolean("is_nullable"))
-                .isPrimaryKey(rs.getBoolean("is_primary_key"))
+                .isPrimaryKey(rs.getBoolean("is_primary_key_internal"))
                 .build();
     }
 }
