@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: TestGts
+  datasource:
+    url: ${PRIMARY_DATABASE_URL:jdbc:postgresql://localhost:5432/postgres}
+    username: ${PRIMARY_DATABASE_USERNAME:postgres}
+    password: ${PRIMARY_DATABASE_PASS:1111}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+  flyway:
+    url: ${spring.datasource.url}
+    user: ${spring.datasource.username}
+    password: ${spring.datasource.password}
+    schemas: public
+    locations: classpath:migration/
+    baseline-on-migrate: false
+    enabled: true
+
+
